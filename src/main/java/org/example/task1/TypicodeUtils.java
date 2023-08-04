@@ -22,8 +22,12 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.lang.String.valueOf;
+
 
 public class TypicodeUtils {
+    private static final String DELETE_USER_URI = "https://jsonplaceholder.typicode.com/users/X";
+    private static final String PUT_USER_URI = "https://jsonplaceholder.typicode.com/users/X";
     private static final String GET_ALL_TODOS_URI = "https://jsonplaceholder.typicode.com/users/X/todos";
     private static final String GET_USER_BY_USERNAME_URI = "https://jsonplaceholder.typicode.com/users?username={username}";
     private static final String GET_USER_BY_ID_URI = "https://jsonplaceholder.typicode.com/users/{id}";
@@ -34,7 +38,7 @@ public class TypicodeUtils {
 
 
     public static User sendGetById(int id){
-        String getbyId = GET_USER_BY_ID_URI.replace("{id}",String.valueOf(id));
+        String getbyId = GET_USER_BY_ID_URI.replace("{id}", valueOf(id));
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(getbyId))
                 .GET()
@@ -86,9 +90,10 @@ public class TypicodeUtils {
         return GSON.fromJson(response.body(), User.class);
     }
 
-    public static int sendDelete(URI uri){
+    public static int sendDelete(int id){
+        String deleteUserUri = DELETE_USER_URI.replace("X", valueOf(id));
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(URI.create(deleteUserUri))
                 .DELETE()
                 .header("Content-type","application/json")
                 .build();
@@ -100,10 +105,11 @@ public class TypicodeUtils {
         }
     }
 
-    public static User sendPut(URI uri,User user) {
+    public static User sendPut(int id,User user) {
+        String putById = PUT_USER_URI.replace("X", valueOf(id));
         String requestBody = GSON.toJson(user);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(uri)
+                .uri(URI.create(putById))
                 .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
                 .header("Content-type","application/json")
                 .build();
@@ -137,8 +143,8 @@ public class TypicodeUtils {
             throw new NoSuchElementException("post not found");
         }
 
-        filePath = filePath.replace("X",String.valueOf(lastPost.get().getUserId()));
-        filePath = filePath.replace("Y",String.valueOf(lastPost.get().getId()));
+        filePath = filePath.replace("X", valueOf(lastPost.get().getUserId()));
+        filePath = filePath.replace("Y", valueOf(lastPost.get().getId()));
 
         File file = new File(filePath);
         makeFile(file);
@@ -152,7 +158,7 @@ public class TypicodeUtils {
         }
     }
     public static void printOpenTodos(int id){
-        String getAllToDosURI = GET_ALL_TODOS_URI.replace("X", String.valueOf(id));
+        String getAllToDosURI = GET_ALL_TODOS_URI.replace("X", valueOf(id));
         List<ToDos> todos = sendGetALL(URI.create(getAllToDosURI), new TypeToken<List<ToDos>>(){}.getType());
         List<ToDos> opentodos = todos.stream().filter(todo -> !todo.isCompleted()).collect(Collectors.toList());
         System.out.println(opentodos);

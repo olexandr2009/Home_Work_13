@@ -6,8 +6,7 @@ import java.net.URI;
 import java.util.List;
 
 public class Task1 {
-    private static final String PUT_USER_URI = "https://jsonplaceholder.typicode.com/users/1";
-    private static final String DELETE_USER_URI = "https://jsonplaceholder.typicode.com/users/1";
+
     private static final String GET_or_POST_ALL_USERS_URI = "https://jsonplaceholder.typicode.com/users";
     public static void main(String[] args) {
         System.out.println(TypicodeUtils.sendGetByUsername("Bret"));
@@ -28,11 +27,11 @@ public class Task1 {
         System.out.println("allUsers");
         System.out.println();
 
-        System.out.println(TypicodeUtils.sendDelete(URI.create(DELETE_USER_URI)));
+        System.out.println(TypicodeUtils.sendDelete(2));
         System.out.println("DELETE Statuscode");
         System.out.println();
 
         System.out.println(user);
-        System.out.println(TypicodeUtils.sendPut(URI.create(PUT_USER_URI),user));
+        System.out.println(TypicodeUtils.sendPut(4,user));
     }
 }
