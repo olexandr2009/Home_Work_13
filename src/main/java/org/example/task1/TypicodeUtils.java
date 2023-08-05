@@ -22,23 +22,24 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
 
 
 public class TypicodeUtils {
-    private static final String DELETE_USER_URI = "https://jsonplaceholder.typicode.com/users/X";
-    private static final String PUT_USER_URI = "https://jsonplaceholder.typicode.com/users/X";
-    private static final String GET_ALL_TODOS_URI = "https://jsonplaceholder.typicode.com/users/X/todos";
-    private static final String GET_USER_BY_USERNAME_URI = "https://jsonplaceholder.typicode.com/users?username={username}";
-    private static final String GET_USER_BY_ID_URI = "https://jsonplaceholder.typicode.com/users/{id}";
-    private static final String GET_ALL_POSTS_URI = "https://jsonplaceholder.typicode.com/users/1/posts";
-    private static final String GET_ALL_COMMENTS_URI = "https://jsonplaceholder.typicode.com/posts/10/comments";
+    private static final String DELETE_USER_URI = "https://jsonplaceholder.typicode.com/users/%d";
+    private static final String PUT_USER_URI = "https://jsonplaceholder.typicode.com/users/%d";
+    private static final String GET_ALL_TODOS_URI = "https://jsonplaceholder.typicode.com/users/%d/todos";
+    private static final String GET_USER_BY_USERNAME_URI = "https://jsonplaceholder.typicode.com/users?username=%s";
+    private static final String GET_USER_BY_ID_URI = "https://jsonplaceholder.typicode.com/users/%d";
+    private static final String GET_ALL_POSTS_URI = "https://jsonplaceholder.typicode.com/users/%d/posts";
+    private static final String GET_ALL_COMMENTS_URI = "https://jsonplaceholder.typicode.com/posts/%d/comments";
     private static final Gson GSON = new Gson();
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
 
 
-    public static User sendGetById(int id){
-        String getbyId = GET_USER_BY_ID_URI.replace("{id}", valueOf(id));
+    public static User sendGetById(int id) {
+        String getbyId = String.format(GET_USER_BY_ID_URI, id);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(getbyId))
                 .GET()
@@ -49,11 +50,11 @@ public class TypicodeUtils {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return GSON.fromJson(response.body(),User.class);
+        return GSON.fromJson(response.body(), User.class);
     }
 
     public static User sendGetByUsername(String username) {
-        String getbyUsername = GET_USER_BY_USERNAME_URI.replace("{username}",username);
+        String getbyUsername = String.format(GET_USER_BY_USERNAME_URI, username);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(getbyUsername))
                 .GET()
@@ -64,22 +65,23 @@ public class TypicodeUtils {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-         List<User> a = GSON.fromJson(response.body(), new TypeToken<List<User>>(){}.getType());
+        List<User> a = GSON.fromJson(response.body(), new TypeToken<List<User>>() {
+        }.getType());
         User user;
         try {
             user = a.get(0);
-        }catch (IndexOutOfBoundsException iobex){
+        } catch (IndexOutOfBoundsException iobex) {
             return null;
         }
         return user;
     }
 
-    public static User sendPost(URI uri,User user){
+    public static User sendPost(URI uri, User user) {
         String requestBody = GSON.toJson(user);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .header("Content-type","application/json")
+                .header("Content-type", "application/json")
                 .build();
         HttpResponse<String> response;
         try {
@@ -90,12 +92,12 @@ public class TypicodeUtils {
         return GSON.fromJson(response.body(), User.class);
     }
 
-    public static int sendDelete(int id){
-        String deleteUserUri = DELETE_USER_URI.replace("X", valueOf(id));
+    public static int sendDelete(int id) {
+        String deleteUserUri = String.format(DELETE_USER_URI, id);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(deleteUserUri))
                 .DELETE()
-                .header("Content-type","application/json")
+                .header("Content-type", "application/json")
                 .build();
         try {
             HttpResponse<String> response = CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
@@ -105,13 +107,13 @@ public class TypicodeUtils {
         }
     }
 
-    public static User sendPut(int id,User user) {
-        String putById = PUT_USER_URI.replace("X", valueOf(id));
+    public static User sendPut(int id, User user) {
+        String putById = String.format(PUT_USER_URI, id);
         String requestBody = GSON.toJson(user);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(putById))
                 .PUT(HttpRequest.BodyPublishers.ofString(requestBody))
-                .header("Content-type","application/json")
+                .header("Content-type", "application/json")
                 .build();
         HttpResponse<String> response;
         try {
@@ -121,7 +123,8 @@ public class TypicodeUtils {
         }
         return GSON.fromJson(response.body(), User.class);
     }
-    public static <T> List<T> sendGetALL(URI uri, Type classtype){
+
+    public static <T> List<T> sendGetALL(URI uri, Type classtype) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .GET()
@@ -134,12 +137,17 @@ public class TypicodeUtils {
         }
         return (GSON.fromJson(response.body(), classtype));
     }
-    public static void printCommentsInFile(String filePath){
-        List<Post> posts = TypicodeUtils.sendGetALL(URI.create(GET_ALL_POSTS_URI), new TypeToken<List<Post>>(){}.getType());
+
+    public static void printCommentsInFile(String filePath, int id) {
+        String getAllPostsUri = String.format(GET_ALL_POSTS_URI, id);
+        String getAllCommentsUri = String.format(GET_ALL_COMMENTS_URI, id);
+        List<Post> posts = TypicodeUtils.sendGetALL(URI.create(getAllPostsUri), new TypeToken<List<Post>>() {
+        }.getType());
 
         Optional<Post> lastPost = posts.stream().max(Comparator.comparingInt(Post::getId));
-        List<Comment> comments = TypicodeUtils.sendGetALL(URI.create(GET_ALL_COMMENTS_URI), new TypeToken<List<Comment>>(){}.getType());
-        if (lastPost.isEmpty()){
+        List<Comment> comments = TypicodeUtils.sendGetALL(URI.create(getAllCommentsUri), new TypeToken<List<Comment>>() {
+        }.getType());
+        if (lastPost.isEmpty()) {
             throw new NoSuchElementException("post not found");
         }
 
@@ -153,18 +161,21 @@ public class TypicodeUtils {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
             sb.append(gson.toJson(comments));
             bw.write(sb.toString());
-        } catch (IOException ioEx){
+        } catch (IOException ioEx) {
             ioEx.printStackTrace();
         }
     }
-    public static void printOpenTodos(int id){
-        String getAllToDosURI = GET_ALL_TODOS_URI.replace("X", valueOf(id));
-        List<ToDos> todos = sendGetALL(URI.create(getAllToDosURI), new TypeToken<List<ToDos>>(){}.getType());
+
+    public static void printOpenTodos(int id) {
+        String getAllToDosURI = String.format(GET_ALL_TODOS_URI, id);
+        List<ToDos> todos = sendGetALL(URI.create(getAllToDosURI), new TypeToken<List<ToDos>>() {
+        }.getType());
         List<ToDos> opentodos = todos.stream().filter(todo -> !todo.isCompleted()).collect(Collectors.toList());
         System.out.println(opentodos);
     }
-    public static void makeFile(File file){
-        if (!file.exists()){
+
+    public static void makeFile(File file) {
+        if (!file.exists()) {
             file.getParentFile().mkdirs();
             try {
                 file.createNewFile();

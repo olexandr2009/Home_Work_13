@@ -11,19 +11,20 @@ public class Task1 {
     public static void main(String[] args) {
         System.out.println(TypicodeUtils.sendGetByUsername("Bret"));
 
-        System.out.println("ByUsername");
+        System.out.println("ByUsername 'Bret' ");
         System.out.println();
 
         User user = TypicodeUtils.sendGetById(4);
         System.out.println(user);
-        System.out.println("ById");
+        System.out.println("ById 4");
         System.out.println();
 
         System.out.println(TypicodeUtils.sendPost(URI.create(GET_or_POST_ALL_USERS_URI), user));
         System.out.println("Post");
         System.out.println();
 
-        System.out.println(TypicodeUtils.sendGetALL(URI.create(GET_or_POST_ALL_USERS_URI), new TypeToken<List<User>>(){}.getType()));
+        System.out.println(TypicodeUtils.sendGetALL(URI.create(GET_or_POST_ALL_USERS_URI), new TypeToken<List<User>>() {
+        }.getType()));
         System.out.println("allUsers");
         System.out.println();
 
@@ -32,6 +33,6 @@ public class Task1 {
         System.out.println();
 
         System.out.println(user);
-        System.out.println(TypicodeUtils.sendPut(4,user));
+        System.out.println(TypicodeUtils.sendPut(4, user));
     }
 }
